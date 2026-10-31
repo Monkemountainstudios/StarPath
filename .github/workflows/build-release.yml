@@ -29,15 +29,21 @@ jobs:
 
     steps:
       - name: Check out Starpath
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check out JUCE 9.0.1
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: juce-framework/JUCE
           ref: 9.0.1
           path: JUCE
           fetch-depth: 1
+
+      - name: Set up MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
       - name: Configure Windows
         if: runner.os == 'Windows'
@@ -103,7 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out release notes
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Download packages
         uses: actions/download-artifact@v4
