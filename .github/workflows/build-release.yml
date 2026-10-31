@@ -21,7 +21,7 @@ jobs:
             os: windows-latest
             artifact: Starpath-Windows-x64
           - name: macOS Universal
-            os: macos-14
+            os: macos-15
             artifact: Starpath-macOS-Universal
     runs-on: ${{ matrix.os }}
     env:
