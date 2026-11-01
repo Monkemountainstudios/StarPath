@@ -28,11 +28,14 @@ private:
         std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attachment;
     };
     void addControl (const char* id, const char* name);
+    std::unique_ptr<Control> createSideControl (const char* id, const char* name,
+                                                juce::Colour colour);
     void timerCallback() override;
 
     StarpathAudioProcessor& processor;
     ConsoleLookAndFeel consoleLookAndFeel;
     std::vector<std::unique_ptr<Control>> controls;
+    std::unique_ptr<Control> inputTrim, outputTrim;
     juce::Image starfieldBackdrop;
     float ambienceTime = 0.0f;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StarpathAudioProcessorEditor)

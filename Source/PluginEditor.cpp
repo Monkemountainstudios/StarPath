@@ -105,6 +105,8 @@ StarpathAudioProcessorEditor::StarpathAudioProcessorEditor (StarpathAudioProcess
                              { "atmosphere", "ATMOSPHERE" }, { "shield", "SHIELD" },
                              { "impact", "IMPACT" }, { "mix", "MIX" } })
         addControl (id, name);
+    inputTrim = createSideControl ("inputTrim", "IN", juce::Colour (0xff55b7c9));
+    outputTrim = createSideControl ("outputTrim", "OUT", juce::Colour (0xffd6a04a));
     setSize (980, 620);
     startTimerHz (30);
 }
@@ -113,6 +115,8 @@ StarpathAudioProcessorEditor::~StarpathAudioProcessorEditor()
 {
     for (auto& control : controls)
         control->slider.setLookAndFeel (nullptr);
+    inputTrim->slider.setLookAndFeel (nullptr);
+    outputTrim->slider.setLookAndFeel (nullptr);
 }
 
 void StarpathAudioProcessorEditor::timerCallback()
@@ -141,6 +145,32 @@ void StarpathAudioProcessorEditor::addControl (const char* id, const char* name)
     addAndMakeVisible (c->label);
     c->attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (processor.parameters, id, c->slider);
     controls.push_back (std::move (c));
+}
+
+std::unique_ptr<StarpathAudioProcessorEditor::Control>
+StarpathAudioProcessorEditor::createSideControl (const char* id, const char* name,
+                                                  juce::Colour colour)
+{
+    auto c = std::make_unique<Control>();
+    c->slider.setSliderStyle (juce::Slider::LinearVertical);
+    c->slider.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
+    c->slider.setLookAndFeel (&consoleLookAndFeel);
+    c->slider.setColour (juce::Slider::trackColourId, colour);
+    c->slider.setPopupDisplayEnabled (true, false, this);
+    c->slider.setTextValueSuffix (" dB");
+    c->slider.setDoubleClickReturnValue (true,
+        processor.parameters.getParameter (id)->convertFrom0to1 (
+            processor.parameters.getParameter (id)->getDefaultValue()));
+    c->slider.setTooltip (juce::String (name) + " gain trim (-18 to +6 dB)");
+    c->label.setText (name, juce::dontSendNotification);
+    c->label.setJustificationType (juce::Justification::centred);
+    c->label.setColour (juce::Label::textColourId, juce::Colour (0xff9fc9d8));
+    c->label.setFont (juce::FontOptions (10.0f).withStyle ("Bold"));
+    addAndMakeVisible (c->slider);
+    addAndMakeVisible (c->label);
+    c->attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
+        processor.parameters, id, c->slider);
+    return c;
 }
 
 void StarpathAudioProcessorEditor::paint (juce::Graphics& g)
@@ -521,5 +551,9 @@ void StarpathAudioProcessorEditor::resized()
         controls[i]->label.setBounds (cell.removeFromTop (18));
         controls[i]->slider.setBounds (cell);
     }
+    inputTrim->label.setBounds (3, 314, 42, 16);
+    inputTrim->slider.setBounds (5, 194, 38, 116);
+    outputTrim->label.setBounds (935, 314, 42, 16);
+    outputTrim->slider.setBounds (937, 194, 38, 116);
 }
 

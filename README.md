@@ -25,6 +25,7 @@ Supported formats:
 4. Move **Mass** toward larger grains for sustained material or toward smaller grains for particulate textures.
 5. Increase **Shield** to intercept a percentage of incoming grains and generate spectral impact ghosts.
 6. Use **Mix** to blend the original signal with Starpath.
+7. Use the slim **In** and **Out** faders on the cockpit frame to set headroom.
 
 Starpath uses probability rather than rigid repetition. Controls establish ranges and biases, while individual grains retain variation and occasional rare events.
 
@@ -44,6 +45,8 @@ Starpath uses probability rather than rigid repetition. Controls establish range
 | **Shield** | Sets interception probability and field size. At 50%, roughly half of eligible grains pass normally while half are deflected. Above 30%, Shield also introduces a quiet 700–1200 ms delay. |
 | **Impact** | Controls the level and persistence of delayed spectral ghosts produced by Shield collisions. |
 | **Mix** | Equal-power dry/wet blend. |
+| **In** | Input trim from -18 to +6 dB. Defaults to -6 dB so dense sources do not immediately overfeed the capture engine. |
+| **Out** | Output trim from -18 to +6 dB before the final -0.3 dBFS safety limiter. |
 
 ### Grain behavior
 

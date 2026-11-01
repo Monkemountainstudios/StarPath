@@ -24,6 +24,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout StarpathAudioProcessor::crea
     layout.add (std::make_unique<P> ("shield", "Shield", R (0.0f, 1.0f), 0.3867188f));
     layout.add (std::make_unique<P> ("impact", "Impact", R (0.0f, 1.0f), 1.0f));
     layout.add (std::make_unique<P> ("mix", "Mix", R (0.0f, 1.0f), 0.636f));
+    // Append gain staging so existing host automation keeps its parameter order.
+    layout.add (std::make_unique<P> ("inputTrim", "Input", R (-18.0f, 6.0f, 0.1f), -6.0f, "dB"));
+    layout.add (std::make_unique<P> ("outputTrim", "Output", R (-18.0f, 6.0f, 0.1f), 0.0f, "dB"));
     return layout;
 }
 
@@ -32,6 +35,19 @@ void StarpathAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     engine.prepare (sampleRate, samplesPerBlock);
     dry.setSize (2, samplesPerBlock);
     wet.setSize (2, samplesPerBlock);
+    inputGain.reset (sampleRate, 0.035);
+    inputGain.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (
+        parameters.getRawParameterValue ("inputTrim")->load()));
+    outputGain.reset (sampleRate, 0.035);
+    outputGain.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (
+        parameters.getRawParameterValue ("outputTrim")->load()));
+    outputSafetyLimiter.prepare (sampleRate);
+}
+
+void StarpathAudioProcessor::releaseResources()
+{
+    engine.reset();
+    outputSafetyLimiter.reset();
 }
 
 bool StarpathAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
@@ -55,6 +71,15 @@ void StarpathAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
         dry.makeCopyOf (buffer, true);
     }
 
+    inputGain.setTargetValue (juce::Decibels::decibelsToGain (
+        parameters.getRawParameterValue ("inputTrim")->load()));
+    for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+    {
+        const auto gain = inputGain.getNextValue();
+        for (int ch = 0; ch < dry.getNumChannels(); ++ch)
+            dry.setSample (ch, sample, dry.getSample (ch, sample) * gain);
+    }
+
     StarpathEngine::Parameters p;
     const auto value = [this] (const char* id) { return parameters.getRawParameterValue (id)->load(); };
     p.warp = value ("warp"); p.traffic = value ("traffic"); p.mass = value ("mass");
@@ -73,6 +98,16 @@ void StarpathAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
         buffer.applyGain (ch, 0, buffer.getNumSamples(), dryGain);
         buffer.addFrom (ch, 0, wet, ch, 0, buffer.getNumSamples(), wetGain);
     }
+
+    outputGain.setTargetValue (juce::Decibels::decibelsToGain (
+        parameters.getRawParameterValue ("outputTrim")->load()));
+    for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+    {
+        const auto gain = outputGain.getNextValue();
+        for (int ch = 0; ch < outputChannels; ++ch)
+            buffer.setSample (ch, sample, buffer.getSample (ch, sample) * gain);
+    }
+    outputSafetyLimiter.process (buffer);
 }
 
 void StarpathAudioProcessor::getStateInformation (juce::MemoryBlock& destination)

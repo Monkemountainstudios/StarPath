@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 — Gain staging and output safety
+
+- Added compact cockpit-side input and output trim faders spanning -18 to +6 dB
+- Added -6 dB of default input headroom for dense sources
+- Added a transparent stereo-linked -0.3 dBFS final safety limiter
+- Added exact-gain, positive-drive, and output-ceiling regression coverage
+
 ## 0.1.0 — Initial release
 
 - Continuous rolling vector-granular capture engine

@@ -64,11 +64,11 @@ jobs:
 
       - name: Build Windows
         if: runner.os == 'Windows'
-        run: cmake --build build --target StarpathDspTests Starpath_Standalone Starpath_VST3
+        run: cmake --build build --target StarpathDspTests StarpathOutputTests Starpath_Standalone Starpath_VST3
 
       - name: Build macOS
         if: runner.os == 'macOS'
-        run: cmake --build build --target StarpathDspTests Starpath_Standalone Starpath_VST3 Starpath_AU
+        run: cmake --build build --target StarpathDspTests StarpathOutputTests Starpath_Standalone Starpath_VST3 Starpath_AU
 
       - name: Test
         run: ctest --test-dir build --output-on-failure

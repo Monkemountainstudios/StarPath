@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(Starpath VERSION 0.1.0 LANGUAGES C CXX)
+project(Starpath VERSION 0.1.1 LANGUAGES C CXX)
 
 enable_testing()
 
@@ -55,6 +55,7 @@ target_sources(Starpath PRIVATE
     Source/PluginEditor.h
     Source/PluginProcessor.cpp
     Source/PluginProcessor.h
+    Source/OutputSafetyLimiter.h
     Source/StarpathEngine.cpp
     Source/StarpathEngine.h)
 
@@ -86,5 +87,17 @@ target_include_directories(StarpathDspTests PRIVATE Source)
 target_compile_definitions(StarpathDspTests PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
 target_link_libraries(StarpathDspTests PRIVATE juce::juce_audio_basics juce::juce_core juce::juce_dsp)
 add_test(NAME StarpathDspSmoke COMMAND StarpathDspTests)
+
+juce_add_console_app(StarpathOutputTests PRODUCT_NAME "Starpath Output Tests")
+juce_generate_juce_header(StarpathOutputTests)
+target_sources(StarpathOutputTests PRIVATE Tests/ProcessorOutputTest.cpp)
+target_include_directories(StarpathOutputTests PRIVATE Source)
+target_compile_definitions(StarpathOutputTests PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
+target_link_libraries(StarpathOutputTests PRIVATE
+    Starpath
+    juce::juce_audio_processors
+    juce::juce_audio_utils
+    juce::juce_dsp)
+add_test(NAME StarpathOutputSafety COMMAND StarpathOutputTests)
 
 

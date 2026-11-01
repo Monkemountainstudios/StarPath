@@ -1,6 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "OutputSafetyLimiter.h"
 #include "StarpathEngine.h"
 
 class StarpathAudioProcessor final : public juce::AudioProcessor
@@ -8,7 +9,7 @@ class StarpathAudioProcessor final : public juce::AudioProcessor
 public:
     StarpathAudioProcessor();
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
-    void releaseResources() override {}
+    void releaseResources() override;
     bool isBusesLayoutSupported (const BusesLayout&) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     juce::AudioProcessorEditor* createEditor() override;
@@ -32,7 +33,9 @@ public:
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
     StarpathEngine engine;
+    OutputSafetyLimiter outputSafetyLimiter;
     juce::AudioBuffer<float> dry, wet;
+    juce::SmoothedValue<float> inputGain, outputGain;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StarpathAudioProcessor)
 };
 
